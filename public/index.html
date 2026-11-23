@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PENTAROLL PRACTICE | CPU対戦</title>
+<style>
+:root{color-scheme:dark;--bg:#09121f;--panel:#121e2e;--panel2:#19293b;--border:#2b4055;--text:#edf5fa;--muted:#96aebc;--accent:#61ccf0;--gold:#f1c96d;--cell:clamp(36px,10vw,57px);font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#193952 0%,#0d1b2b 43%,var(--bg) 100%);color:var(--text);min-height:100vh}button,select{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.26}
+.app{max-width:1050px;margin:auto;padding:20px 16px 34px}.header{display:flex;align-items:center;gap:14px;justify-content:space-between;margin-bottom:20px}.eyebrow{font-size:11px;letter-spacing:.22em;color:var(--accent);font-weight:800}.header h1{font-size:clamp(22px,4vw,29px);margin:3px 0;font-weight:850;letter-spacing:.04em}.subtitle{color:var(--muted);font-size:13px;margin:0}.headerBadge{border:1px solid var(--border);padding:7px 10px;border-radius:100px;color:var(--muted);font-size:12px;white-space:nowrap}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:18px}.gamePanel,.sideCard{background:rgba(18,30,46,.89);border:1px solid #2c4053;border-radius:18px;box-shadow:0 18px 60px #02091366}.gamePanel{padding:18px 12px 22px;min-width:0}.statusRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 12px 8px}.statusTitle{font-weight:800;font-size:18px}.statusSub{font-size:12px;color:var(--muted);margin-top:4px;max-width:450px;line-height:1.6}.turnLight{width:10px;height:10px;border-radius:50%;display:inline-block;background:var(--gold);box-shadow:0 0 0 4px #f1c96d18;margin-right:8px}.scoreRow{display:flex;gap:10px;justify-content:center;margin:8px 0 6px}.score{display:flex;align-items:center;gap:8px;background:#0e1927;border:1px solid #29394c;border-radius:12px;padding:8px 13px;font-size:13px;color:#b9cbd8}.score.active{border-color:#76cfe4;color:white}.score strong{font-variant-numeric:tabular-nums}.piece{width:22px;height:22px;border-radius:50%;display:inline-block;flex:none;box-shadow:inset -3px -5px 5px #0004,0 2px 3px #0004}.piece.white,.marble.white{background:radial-gradient(circle at 32% 23%,#fff 0%,#fff 19%,#e2e5e7 48%,#a3b3be 86%,#6b8998 100%)}.piece.black,.marble.black{background:radial-gradient(circle at 31% 22%,#75899c 0%,#263746 32%,#101d2a 75%,#060d14 100%)}
+.boardOuter{overflow:auto;padding:4px 0 0}.matrix{--gap:3px;display:grid;grid-template-columns:repeat(8,var(--cell));grid-template-rows:repeat(8,var(--cell));gap:var(--gap);justify-content:center;margin:8px auto 10px;min-width:max-content}.corner{background:transparent}.edgeButton{position:relative;display:flex;align-items:center;justify-content:center;border:1px solid #38536a;background:#203548;color:#9db8c9;border-radius:11px;font-size:19px;font-weight:750;transition:background .12s,transform .12s,border-color .12s}.edgeButton:not(:disabled):hover{background:#2a6079;transform:scale(1.05);color:white}.edgeButton.legal{color:#9de6f9;border-color:#46718a}.edgeButton.suggest{box-shadow:0 0 0 2px var(--gold),0 0 19px #f1c96d44;background:#80632b;color:white}.edgeButton.last{border-color:#cbad58}.edgeButton.preview{background:#346a83;border-color:#98e9ff}.edgeButton:focus-visible{outline:3px solid white;outline-offset:3px}.well{position:relative;display:flex;align-items:center;justify-content:center;background:linear-gradient(155deg,#38b0df 0%,#1590c7 52%,#0978ad 100%);box-shadow:inset 0 4px 6px #b5ecf22a,inset 0 -5px 7px #003f6d77;border-radius:7px}.well:before{content:"";position:absolute;width:75%;height:75%;border-radius:50%;background:radial-gradient(circle at 38% 31%,#077aad,#126490 63%,#43b6e0 100%);box-shadow:inset 1px 2px 5px #002e567f,0 1px 1px #c6eff555}.marble{width:78%;height:78%;border-radius:50%;position:relative;z-index:1;box-shadow:inset -5px -6px 10px #0005,0 3px 6px #003c5d88}.marble:after{content:"";position:absolute;top:14%;left:21%;width:26%;height:12%;background:#fff7;border-radius:50%;filter:blur(3px);transform:rotate(-27deg)}.well.shifted{box-shadow:inset 0 0 0 3px #f0d17c,inset 0 0 14px #263852}.well.winning{outline:3px solid #ffce66;outline-offset:-3px;z-index:2}.well.lastTarget{outline:2px solid #e9fffb;outline-offset:-3px}.well span.num{position:absolute;bottom:2px;right:4px;font-size:9px;color:#c4e9fa99}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}.smallButton{background:#1b3346;border:1px solid #38546a;border-radius:10px;color:#e8f3f9;padding:10px 13px;font-weight:650;font-size:13px}.smallButton:hover:not(:disabled){background:#29506b}.smallButton.primary{background:#206982;border-color:#449bc1}.callout{min-height:43px;background:#0e1928;border-radius:10px;color:#bcd4e2;padding:10px 12px;font-size:12px;line-height:1.65;margin:13px 12px 0;border:1px solid #253b4d}
+.sidebar{display:flex;flex-direction:column;gap:14px}.sideCard{padding:18px}.sideCard h2{font-size:15px;margin:0 0 15px}.field{margin-bottom:14px}.field label{display:block;color:#a6bfd0;font-size:12px;margin-bottom:7px}.field select{width:100%;background:#0a1727;border:1px solid #35516a;border-radius:9px;color:white;padding:11px;outline:none}.field select:focus-visible{outline:2px solid var(--accent)}.hintText{font-size:12px;color:#b1c4d2;line-height:1.75;margin:0}.hintText strong{color:white}.history{margin:0;padding:0;list-style:none;max-height:225px;overflow:auto}.history li{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #ffffff12;color:#a9c1d0;font-size:12px;gap:10px}.history li span:last-child{color:white}.history .empty{color:#879baa;font-size:12px;border:0}.footer{margin-top:17px;text-align:center;color:#718a9c;font-size:11px}.rulesbox{display:none;margin-top:12px;background:#0d1d2c;padding:13px;border-radius:10px;border:1px solid #2d4559;color:#bcd5e5;font-size:12px;line-height:1.8}.rulesbox.open{display:block}.kbd{border:1px solid #58738a;padding:1px 5px;border-radius:5px;font-size:11px;color:white}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.sidebar{display:grid;grid-template-columns:1fr 1fr}.sideCard{padding:15px}.headerBadge{display:none}}@media(max-width:480px){.app{padding:14px 7px 22px}.gamePanel{padding:14px 5px 16px;border-radius:14px}.header{padding:0 9px}.statusRow{padding:0 9px 7px}.statusTitle{font-size:16px}.scoreRow{gap:6px}.score{padding:7px 9px;font-size:11px}.score .piece{width:18px;height:18px}.matrix{--gap:2px}.edgeButton{border-radius:8px}.well{border-radius:5px}.sidebar{grid-template-columns:1fr;gap:10px}.sideCard{padding:15px}.footer{padding:0 8px}}
+</style>
+</head>
+<body>
+<div class="app">
+ <header class="header"><div><div class="eyebrow">TACTICAL BOARD GAME TRAINER</div><h1>PENTAROLL <span style="color:#5fbfe1">PRACTICE</span></h1><p class="subtitle">端から押し込む五目並べ — CPUと戦術練習</p></div><div class="headerBadge">6 × 6 ・ 2 PLAYER</div></header>
+ <div class="layout">
+  <main class="gamePanel">
+   <div class="statusRow"><div><div class="statusTitle"><span class="turnLight" id="turnLight"></span><span id="status">あなたの番です</span></div><div class="statusSub" id="substatus">盤面の外側の矢印を押して、玉を入れてください。</div></div><div id="moveCount" style="font-size:12px;color:#b2c8d5;white-space:nowrap">0 / 36手</div></div>
+   <div class="scoreRow"><div class="score active" id="humanScore"><span class="piece white"></span><span>あなた（白）</span><strong id="whiteRemain">残18</strong></div><div class="score" id="cpuScore"><span class="piece black"></span><span>CPU（黒）</span><strong id="blackRemain">残18</strong></div></div>
+   <div class="boardOuter"><div class="matrix" id="board" aria-label="ペンタロール 6×6 盤面"></div></div>
+   <div class="toolbar"><button class="smallButton primary" id="newButton">↺ 新しい対局</button><button class="smallButton" id="undoButton">↶ 待った</button><button class="smallButton" id="hintButton">✦ ヒント</button><button class="smallButton" id="ruleButton" aria-expanded="false">？ ルール</button></div>
+   <div class="callout" id="notice" aria-live="polite">矢印から玉を入れます。すでに玉がある場合は、奥の空きマスまで押し込みます。</div>
+   <div class="rulesbox" id="rules">白と黒が交互に1球ずつ置き、縦・横・斜めで先に5球並べた側が勝利。<br>玉は<strong>端のマスからのみ</strong>入れます。端が埋まっている場合は、その方向に連続した玉を1マスずつ押します。押した先が盤外にはみ出す手は選べません。<br>どちらかの玉が同時に5個揃った場合の細則は資料上明確でないため、このアプリでは<strong>双方同時成立を引き分け</strong>としています。</div>
+  </main>
+  <aside class="sidebar">
+   <section class="sideCard"><h2>対局設定</h2><div class="field"><label for="level">CPUの強さ</label><select id="level"><option value="easy">初級：ランダム中心</option><option value="normal" selected>中級：2手先まで読む</option><option value="hard">上級：4手先まで読む</option></select></div><div class="field"><label for="first">先手</label><select id="first"><option value="human" selected>あなた（白）が先手</option><option value="cpu">CPU（黒）が先手</option></select></div><p class="hintText">設定を変更したら、<strong>「新しい対局」</strong>で反映されます。CPUは端からの押し込みと5目の成立を考えて着手します。</p></section>
+   <section class="sideCard"><h2>対局の記録</h2><ol class="history" id="history"><li class="empty">対局開始前です</li></ol></section>
+   <section class="sideCard"><h2>練習のコツ</h2><p class="hintText">自分の4目を作るだけでなく、相手の玉をずらせる方向を探すのがポイントです。<br><br>ヒント機能は現在の盤面からCPUが選んだ候補手を表示します。最善手を保証するものではありません。</p></section>
+  </aside>
+ </div>
+ <div class="footer">非公式の練習用アプリです。公式製品・公式画像を使用していません。</div>
+</div>
+<script>
+const PentaEngine = (()=>{
+'use strict';
+const N=6, WIN=10_000_000;
+const edges=[];
+for(let i=0;i<N;i++) edges.push({id:`T${i}`,side:'top',pos:i,r:0,c:i,dr:1,dc:0});
+for(let i=0;i<N;i++) edges.push({id:`R${i}`,side:'right',pos:i,r:i,c:N-1,dr:0,dc:-1});
+for(let i=0;i<N;i++) edges.push({id:`B${i}`,side:'bottom',pos:i,r:N-1,c:i,dr:-1,dc:0});
+for(let i=0;i<N;i++) edges.push({id:`L${i}`,side:'left',pos:i,r:i,c:0,dr:0,dc:1});
+const windows=[];
+for(let r=0;r<N;r++) for(let c=0;c<N;c++) for(const [dr,dc] of [[0,1],[1,0],[1,1],[1,-1]]){
+ if(r+4*dr>=0 && r+4*dr<N && c+4*dc>=0 && c+4*dc<N){
+  const x=[];for(let k=0;k<5;k++)x.push((r+k*dr)*N+c+k*dc);windows.push(x);
+ }
+}
+function getPath(move){const out=[];for(let i=0;i<N;i++)out.push((move.r+i*move.dr)*N+move.c+i*move.dc);return out;}
+function play(board,move,who){
+ const path=getPath(move),b=board.slice();let vacant=-1;
+ for(let i=0;i<N;i++) if(b[path[i]]===0){vacant=i;break;}
+ if(vacant<0)return null;
+ for(let i=vacant;i>0;i--)b[path[i]]=b[path[i-1]];
+ b[path[0]]=who;
+ return b;
+}
+function legal(board){return edges.filter(m=>getPath(m).some(i=>board[i]===0));}
+function getLines(board){const result={1:[],[-1]:[]};for(const line of windows){const p=board[line[0]];if(p!==0&&line.every(i=>board[i]===p))result[p].push(line);}return result;}
+function winner(board){const x=getLines(board);return x[1].length&&x[-1].length?2:x[1].length?1:x[-1].length?-1:0;}
+const weights=[0,2,14,100,850,WIN];
+function evaluate(board,who){let score=0;for(const line of windows){let a=0,b=0;for(const i of line){if(board[i]===who)a++;else if(board[i]===-who)b++;}if(a&&b)continue;if(a)score+=weights[a];if(b)score-=weights[b]*1.08;}return score;}
+function immediateWin(board,who){for(const m of legal(board)){const next=play(board,m,who);if(winner(next)===who)return true;}return false;}
+function rank(board,who){const list=[];for(const m of legal(board)){const next=play(board,m,who);const w=winner(next);let score=w===who?WIN:w===-who?-WIN:w===2?0:evaluate(next,who);list.push({move:m,next,score});}list.sort((a,b)=>b.score-a.score);return list;}
+function negamax(board,toMove,depth,alpha,beta,maxWidth,ply){
+ const win=winner(board);
+ if(win)return win===2?0:win===toMove?WIN-ply:-WIN+ply;
+ if(!board.includes(0))return 0;
+ if(depth===0)return evaluate(board,toMove);
+ const choices=rank(board,toMove).slice(0,maxWidth);
+ if(!choices.length)return 0;
+ let best=-Infinity;
+ for(const x of choices){const value=-negamax(x.next,-toMove,depth-1,-beta,-alpha,maxWidth,ply+1);
+  best=Math.max(best,value);alpha=Math.max(alpha,value);if(alpha>=beta)break;
+ }
+ return best;
+}
+function choose(board,who,level){
+ let candidates=rank(board,who);if(!candidates.length)return null;
+ if(level==='easy'){
+  const immediate=candidates.filter(c=>winner(c.next)===who);
+  return (immediate.length?immediate:candidates)[Math.floor(Math.random()*(immediate.length?immediate.length:candidates.length))].move;
+ }
+ const winning=candidates.find(c=>winner(c.next)===who);if(winning)return winning.move;
+ const safe=candidates.filter(c=>!immediateWin(c.next,-who));
+ if(safe.length)candidates=safe;
+ const depth=level==='hard'?4:2;
+ const width=level==='hard'?8:12;
+ let best=-Infinity,selected=[];
+ for(const x of candidates){
+  let value=-negamax(x.next,-who,depth-1,-Infinity,Infinity,width,1);
+  value+=x.score*0.00001;
+  if(value>best+.005){best=value;selected=[x.move];}
+  else if(Math.abs(value-best)<=.005)selected.push(x.move);
+ }
+ return selected[Math.floor(Math.random()*selected.length)];
+}
+function moveLabel(m){if(!m)return'';const side={top:'上',right:'右',bottom:'下',left:'左'}[m.side];const num=m.pos+1;return `${side}から ${num} ${m.side==='top'||m.side==='bottom'?'列':'行'}`;}
+return{N,edges,windows,play,legal,getPath,getLines,winner,evaluate,immediateWin,choose,moveLabel};
+})();
+</script>
+<script>
+(()=>{
+'use strict';
+const E=PentaEngine, H=1,C=-1;
+const $=id=>document.getElementById(id);
+const els={board:$('board'),status:$('status'),sub:$('substatus'),notice:$('notice'),history:$('history'),humanScore:$('humanScore'),cpuScore:$('cpuScore'),level:$('level'),first:$('first'),new:$('newButton'),undo:$('undoButton'),hint:$('hintButton'),rules:$('rules'),ruleButton:$('ruleButton'),moveCount:$('moveCount'),whiteRemain:$('whiteRemain'),blackRemain:$('blackRemain')};
+let board=Array(36).fill(0),turn=H,over=false,busy=false,history=[],snapshots=[],last=null,suggest=null,preview=null,winCells=[],timer=null,token=0;
+const arrowBySide={top:'↓',right:'←',bottom:'↑',left:'→'}, buttons=new Map(),wells=[];
+function makeUI(){
+ for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+  if((r===0||r===7)&&(c===0||c===7)){let cell=document.createElement('span');cell.className='corner';els.board.append(cell);continue;}
+  if(r===0||r===7||c===0||c===7){
+   const m=r===0?E.edges.find(x=>x.side==='top'&&x.pos===c-1):r===7?E.edges.find(x=>x.side==='bottom'&&x.pos===c-1):c===0?E.edges.find(x=>x.side==='left'&&x.pos===r-1):E.edges.find(x=>x.side==='right'&&x.pos===r-1);
+   const b=document.createElement('button');b.type='button';b.className='edgeButton';b.textContent=arrowBySide[m.side];b.setAttribute('aria-label',E.moveLabel(m)+'から玉を入れる');b.title=E.moveLabel(m);b.addEventListener('click',()=>humanMove(m));b.addEventListener('mouseenter',()=>setPreview(m));b.addEventListener('mouseleave',()=>setPreview(null));b.addEventListener('focus',()=>setPreview(m));b.addEventListener('blur',()=>setPreview(null));els.board.append(b);buttons.set(m.id,b);
+  } else {const cell=document.createElement('div');cell.className='well';cell.setAttribute('role','gridcell');cell.setAttribute('aria-label',`${r}行${c}列 空き`);els.board.append(cell);wells[(r-1)*6+c-1]=cell;}
+ }
+}
+function reset(){token++;if(timer)clearTimeout(timer);timer=null;board=Array(36).fill(0);turn=els.first.value==='cpu'?C:H;over=false;busy=false;history=[];snapshots=[];last=null;suggest=null;preview=null;winCells=[];setNotice('盤の外側の矢印を押して、玉を入れてください。');render();scheduleCPU();}
+function setNotice(s){els.notice.textContent=s;}
+function setPreview(m){if(over||busy||turn!==H||!m){preview=null;}else{preview=E.play(board,m,H)?m:null;}renderHighlights();}
+function renderHighlights(){
+ const available=new Set(E.legal(board).map(x=>x.id));const inputEnabled=(!over&&!busy&&turn===H);
+ for(const m of E.edges){const b=buttons.get(m.id);b.disabled=!inputEnabled||!available.has(m.id);b.classList.toggle('legal',inputEnabled&&available.has(m.id));b.classList.toggle('last',last?.id===m.id);b.classList.toggle('suggest',suggest?.id===m.id);b.classList.toggle('preview',preview?.id===m.id);}
+ let changed=new Set();if(preview){const path=E.getPath(preview);for(const i of path){changed.add(i);if(board[i]===0)break;}}
+ const winSet=new Set(winCells);
+ for(let i=0;i<36;i++){wells[i].classList.toggle('shifted',changed.has(i));wells[i].classList.toggle('winning',winSet.has(i));wells[i].classList.toggle('lastTarget',last&&E.getPath(last)[0]===i);}
+}
+function render(){
+ for(let i=0;i<36;i++){const c=wells[i];c.replaceChildren();const v=board[i];if(v){const m=document.createElement('span');m.className='marble '+(v===H?'white':'black');c.append(m);}c.setAttribute('aria-label',`${Math.floor(i/6)+1}行${(i%6)+1}列 ${v===H?'白':v===C?'黒':'空き'}`);}
+ const wc=board.filter(v=>v===H).length,bc=board.filter(v=>v===C).length;
+ els.whiteRemain.textContent='残'+(18-wc);els.blackRemain.textContent='残'+(18-bc);els.moveCount.textContent=`${history.length} / 36手`;
+ els.humanScore.classList.toggle('active',turn===H&&!over);els.cpuScore.classList.toggle('active',turn===C&&!over);
+ if(over){const win=E.winner(board);els.status.textContent=win===H?'あなたの勝ち！':win===C?'CPUの勝ち':win===2?'双方5目で引き分け':'引き分け';els.sub.textContent='対局終了。「新しい対局」で再挑戦できます。';}
+ else if(busy||turn===C){els.status.textContent='CPUの番です';els.sub.textContent=busy?'CPUが次の手を考えています…':'CPUが着手します…';}
+ else {els.status.textContent='あなたの番です';els.sub.textContent='上下左右の矢印から玉を入れてください。';}
+ els.undo.disabled=!snapshots.length;els.hint.disabled=over||busy||turn!==H;
+ const list=history.slice().reverse();els.history.replaceChildren();if(!list.length){const li=document.createElement('li');li.className='empty';li.textContent='まだ着手がありません';els.history.append(li);}
+ for(let i=0;i<Math.min(12,list.length);i++){const x=list[i],li=document.createElement('li');const l=document.createElement('span'),r=document.createElement('span');l.textContent=`${history.length-i}. ${x.player===H?'あなた':'CPU'}`;r.textContent=E.moveLabel(x.move);li.append(l,r);els.history.append(li);}
+ renderHighlights();
+}
+function applyMove(move,player){const next=E.play(board,move,player);if(!next)return false;
+ snapshots.push({board:board.slice(),turn,over,last,winCells:winCells.slice()});history.push({move,player});board=next;last=move;preview=null;suggest=null;
+ const outcome=E.winner(board);
+ if(outcome||!board.includes(0)){over=true;winCells=[...E.getLines(board)[H],...E.getLines(board)[C]].flat();setNotice(outcome===H?'あなたが5目を完成させました。':outcome===C?'CPUが5目を完成させました。':outcome===2?'両者の5目が同時に成立しました。':'全36マスが埋まりました。');}
+ else {turn=-player;setNotice(player===H?`${E.moveLabel(move)}から入れました。CPUの着手を確認しましょう。`:`CPUは${E.moveLabel(move)}から入れました。次の一手を考えましょう。`);}
+ render();return true;
+}
+function humanMove(move){if(over||busy||turn!==H)return;if(!applyMove(move,H)){setNotice('この方向は奥に空きがないため、押し込めません。');return;}scheduleCPU();}
+function scheduleCPU(){if(over||turn!==C)return;busy=true;render();const current=++token;timer=setTimeout(()=>{
+ if(current!==token||over||turn!==C)return;
+ let move=E.choose(board,C,els.level.value);busy=false;timer=null;
+ if(move)applyMove(move,C);else{over=true;setNotice('合法手がありません。引き分けです。');render();}
+ },180);
+}
+function undo(){if(!snapshots.length)return;token++;if(timer)clearTimeout(timer);timer=null;busy=false;
+ do{const s=snapshots.pop();history.pop();board=s.board;turn=s.turn;over=s.over;last=s.last;winCells=s.winCells;}while(turn===C&&snapshots.length);
+ suggest=null;preview=null;setNotice('手を戻しました。別の手順を試せます。');render();if(turn===C)scheduleCPU();}
+function hint(){if(over||busy||turn!==H)return;const move=E.choose(board,H,'hard');if(!move)return;suggest=move;let why='相手の動きも考慮した有力な候補です。';const next=E.play(board,move,H);if(E.winner(next)===H)why='この一手で5個揃います。';else if(E.immediateWin(board,C)&&!E.immediateWin(next,C))why='CPUの次の一手による勝利を防ぎます。';setNotice(`ヒント：${E.moveLabel(move)}の矢印が候補です。${why}`);renderHighlights();}
+makeUI();els.new.addEventListener('click',reset);els.undo.addEventListener('click',undo);els.hint.addEventListener('click',hint);els.ruleButton.addEventListener('click',()=>{const open=els.rules.classList.toggle('open');els.ruleButton.setAttribute('aria-expanded',String(open));});reset();
+})();
+</script>
+</body>
+</html>
